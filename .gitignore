@@ -101,6 +101,10 @@ yarn-error.log*
 # Fly.io
 fly.toml.local
 
+# Wrangler / Cloudflare
+.wrangler/
+out/
+
 # Secrets / keys
 *.pem
 *.key
