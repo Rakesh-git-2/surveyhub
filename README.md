@@ -2,6 +2,9 @@
 
 An AI-powered survey platform built with Next.js 15 and Django REST Framework. Generate surveys from a prompt, collect responses, and analyse results — all in one place.
 
+**Live demo:** https://surveyhub-aha.pages.dev  
+**API:** https://surveyhub-api.fly.dev
+
 ---
 
 ## Screenshots
@@ -71,9 +74,10 @@ An AI-powered survey platform built with Next.js 15 and Django REST Framework. G
 | Styling | CSS custom properties, Lucide React icons |
 | Backend | Django 5.1, Django REST Framework, SimpleJWT |
 | AI | Google Gemini (`google-genai`) |
-| Database | PostgreSQL |
+| Database | Neon serverless PostgreSQL |
 | Auth | JWT (access + refresh tokens stored in localStorage) |
 | Webhooks | HMAC-SHA256 signed POST delivery via background threads |
+| Hosting | Cloudflare Pages (frontend) + Fly.io (backend) |
 
 ---
 
@@ -208,6 +212,47 @@ surveyhub/
 │   └── surveys/               # Main app: models, views, signals
 ├── screenshots/               # Feature screenshots
 └── docker-compose.yml
+```
+
+---
+
+## Deployment
+
+The project is deployed on a zero-cost stack:
+
+| Component | Service | Notes |
+|---|---|---|
+| Frontend | Cloudflare Pages | Static export via `next build` + `wrangler pages deploy` |
+| Backend | Fly.io (free tier) | 256 MB shared CPU; auto-stops when idle, cold-starts on request |
+| Database | Neon (serverless Postgres) | Free tier; suspends on idle |
+
+### Frontend — Cloudflare Pages
+
+```bash
+cd surveyhub-frontend
+NEXT_PUBLIC_API_URL=https://surveyhub-api.fly.dev npm run build
+npx wrangler pages deploy out --project-name surveyhub --branch main --commit-dirty=true
+```
+
+The frontend uses `output: 'export'` (static HTML). `NEXT_PUBLIC_API_URL` must be set **at build time** — it is baked into the bundle. Dynamic routes (`/survey-response/[id]`, etc.) are served via `_redirects` SPA rewrites.
+
+### Backend — Fly.io
+
+```bash
+cd surveyhubbackend
+fly deploy --app surveyhub-api
+```
+
+Migrations run automatically on each deploy via `release_command = 'python manage.py migrate --noinput'` in `fly.toml`.
+
+Fly secrets required:
+
+```bash
+fly secrets set SECRET_KEY=...           --app surveyhub-api
+fly secrets set DATABASE_URL=...         --app surveyhub-api   # Neon connection string
+fly secrets set GEMINI_API_KEY=...       --app surveyhub-api
+fly secrets set ALLOWED_HOSTS=surveyhub-api.fly.dev --app surveyhub-api
+fly secrets set FRONTEND_URL=https://surveyhub-aha.pages.dev  --app surveyhub-api
 ```
 
 ---
