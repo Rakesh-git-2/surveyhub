@@ -1,0 +1,3 @@
+/survey-response/:id  /survey-response/index.html  200
+/survey-report/:id    /survey-report/index.html    200
+/survey-distribution/:id  /survey-distribution/index.html  200
