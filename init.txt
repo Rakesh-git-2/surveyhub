@@ -1,128 +1,178 @@
-# 🚀 **SurveyHub Product Roadmap**  
+# SurveyHub Product Roadmap
 
 Black palette
 https://www.figma.com/design/5p3q97oU3f2cfHNf7TTgZD/Color-wheel-palette-generator-(Community)?node-id=0-1&p=f&t=pSMLTrfmcFnHy4sY-0
 
-## **📅 Phase 1: MVP (Minimal Viable Product) – 3 Months**  
-### **1️⃣ Core Features & Pages**  
-✅ **User Authentication**  
-- Login / Signup (Google, Email, Social Logins)  
-- Forgot Password / Reset  
+---
 
-✅ **Dashboard Page**  
-- Overview of active surveys  
-- Quick stats (Total Responses, Engagement Rate)  
-- Recent surveys & shortcuts to reports  
-
-✅ **Survey Creation Page**  
-- Drag-and-drop survey builder  
-- Question types: MCQ, Likert Scale, Open-ended, Yes/No, Rating  
-- Conditional Logic (skip/branch based on answers)  
-- Auto-save & Draft mode  
-
-✅ **Survey Distribution Page**  
-- Generate shareable links  
-- Embed code for websites  
-- QR code & social media sharing  
-- Email & SMS integrations  
-
-✅ **Survey Response Page (For Participants)**  
-- Mobile-friendly UI  
-- Progress tracker  
-- Option to save & continue later  
-
-✅ **Basic Survey Report Page**  
-- View response count & demographics  
-- Export data (CSV, Excel)  
-- Simple bar charts & pie charts  
-
-✅ **User Management Page**  
-- Edit profile (name, email, avatar)  
-- Manage subscription (Free vs. Paid Plan)  
-- Invite team members (for Business Plan)  
-
-✅ **Admin Panel (For Internal Use)**  
-- User management  
-- Survey moderation  
-- Payment tracking  
+## Build Status Legend
+- [DONE]      Fully implemented
+- [PARTIAL]   Backend or scaffolding only, UI not built
+- [TODO]      Not started
 
 ---
 
-## **📅 Phase 2: Advanced Reporting & AI (Months 4-6)**  
-### **2️⃣ AI-Enhanced Features & Pages**  
-✅ **Advanced Reporting Page**  
-- AI-powered summary of responses  
-- Sentiment analysis on open-ended answers  
-- Identify key trends (e.g., recurring complaints)  
-- Word cloud for most common words  
+## Phase 1: MVP – Core Features
 
-✅ **AI-Generated Recommendations Page**  
-- Actionable insights based on survey data  
-- Compare results to industry benchmarks  
-- Predictive analytics for trend forecasting  
+### Infrastructure & Foundation
+[DONE]    Backend: Django REST API with JWT authentication
+[DONE]    Database models: Survey, Question, Choice, Response, Answer
+[DONE]    API endpoints: Auth (register, login, logout, profile)
+[DONE]    API endpoints: Survey CRUD, Question CRUD, Response submit/list
+[DONE]    Frontend: Next.js 15 app with root layout and navigation
+[DONE]    Frontend: UI component library (Button, Card, Input, Modal, Loading, Toast)
+[DONE]    Frontend: axios API layer with JWT auth support (api.js, useApi hook)
+[DONE]    Frontend: AuthContext with login/logout state management
+[DONE]    Landing page
 
-✅ **Automated Report Generation**  
-- Generate professional PDF reports  
-- Customizable sections (summary, charts, recommendations)  
-- Schedule & auto-send reports to stakeholders  
+### Features to Build (Phase 1)
 
-✅ **Survey Engagement Metrics Page**  
-- Track how long users spend answering  
-- Identify high drop-off questions  
-- A/B testing to optimize survey effectiveness  
+[TODO]    AUTH PAGE
+          - Login form (email + password) → POST /api/auth/login/
+          - Signup form → POST /api/auth/register/
+          - Forgot password / reset flow
+          - Google / Social login (OAuth)
+          - Redirect to dashboard on success
 
-✅ **Survey API & Integrations Page**  
-- Connect with Google Sheets, Slack, Zapier  
-- Webhooks for real-time response tracking  
+[TODO]    DASHBOARD PAGE
+          - List of user's active surveys
+          - Quick stats: total responses, engagement rate
+          - Shortcuts to create survey and view reports
+          - Recent activity feed
 
-✅ **Notification System**  
-- Email alerts for new responses  
-- Automated reminders for incomplete surveys  
+[TODO]    SURVEY CREATION PAGE
+          - Drag-and-drop question builder
+          - Question types: MCQ, Likert, Open-ended, Yes/No, Rating
+            (Backend supports: text, multiple_choice, rating, yes_no)
+          - Add/remove/reorder questions and choices
+          - Conditional logic (skip/branch on answer)
+          - Auto-save draft mode
+          - Publish survey action → POST /api/surveys/
 
----
+[TODO]    SURVEY DISTRIBUTION PAGE
+          - Generate and display shareable link
+          - Embed code snippet for websites
+          - QR code generation
+          - Email / SMS share options
 
-## **📅 Phase 3: Scaling & AI Enhancements (Months 7-12)**  
-### **3️⃣ AI & Personalization Features**  
-✅ **Conversational AI Surveys (Chatbot-Like Experience)**  
-- AI-guided question flow  
-- Smart follow-up questions based on previous answers  
+[TODO]    SURVEY RESPONSE PAGE (Participant view)
+          - Render questions dynamically by type
+          - Mobile-friendly layout
+          - Progress bar
+          - Submit response → POST /api/surveys/<id>/responses/
+          - Anonymous + authenticated submission support
 
-✅ **AI-Powered Survey Auto-Generation**  
-- Auto-create surveys based on industry type  
-- Smart suggestions for questions & answer choices  
+[TODO]    SURVEY REPORT PAGE
+          - Response count and demographics overview
+          - Bar charts and pie charts per question
+          - Open-ended answer list
+          - Export to CSV / Excel
 
-✅ **Multi-Language Support**  
-- AI-powered translation for global users  
-- Detects participant language & adjusts automatically  
+[TODO]    USER MANAGEMENT PAGE
+          - Edit profile (name, email, avatar)
+          - Subscription plan display (Free vs Paid)
+          - Invite team members
 
-✅ **User Role Management & Permissions**  
-- Different access levels (Admin, Editor, Viewer)  
-- Audit logs for security  
-
-✅ **Mobile App Development (iOS & Android)**  
-- Push notifications for new responses  
-- Offline survey collection (sync later)  
-
-✅ **Performance & Scalability Enhancements**  
-- Load balancing for high-traffic surveys  
-- Optimized database for faster queries  
-
----
-
-# 🎯 **Tech Stack for Development**  
-💻 **Frontend:** React.js + Tailwind CSS + Next.js (for SSR)  
-⚙️ **Backend:** Node.js + Express.js  
-📦 **Database:** PostgreSQL (structured survey data) + Redis (caching)  
-🤖 **AI Services:** OpenAI GPT, TensorFlow, VADER (Sentiment Analysis)  
-📡 **Hosting:** AWS (EC2, S3, Lambda), Firebase for Authentication  
+[TODO]    ADMIN PANEL
+          - List and moderate all surveys
+          - User management table
+          - Payment / subscription tracking
 
 ---
 
-# 🏁 **Final Deliverables & Timeline**  
-✅ **MVP Launch (Month 3)** – Basic survey creation, response collection, and reporting  
-✅ **AI-Powered Reporting (Month 6)** – Smart insights, sentiment analysis, recommendations  
-✅ **Full Feature Rollout (Month 12)** – Conversational AI, mobile apps, real-time analytics  
+## Phase 2: Advanced Reporting & AI (Months 4–6)
+
+[TODO]    ADVANCED REPORTING PAGE
+          - AI-powered summary of open-ended responses
+          - Sentiment analysis (VADER or OpenAI)
+          - Word cloud for common themes
+          - Key trend identification
+
+[TODO]    AI RECOMMENDATIONS PAGE
+          - Actionable insights from survey data
+          - Industry benchmark comparisons
+          - Predictive trend forecasting
+
+[TODO]    AUTOMATED REPORT GENERATION
+          - Generate PDF reports with charts + summary
+          - Customizable sections
+          - Schedule and auto-send to stakeholders
+
+[TODO]    ENGAGEMENT METRICS PAGE
+          - Time-per-question analytics
+          - Drop-off point identification
+          - A/B testing for survey variants
+
+[TODO]    INTEGRATIONS PAGE
+          - Google Sheets sync
+          - Slack notifications
+          - Zapier webhooks
+          - Real-time response webhooks
+
+[TODO]    NOTIFICATION SYSTEM
+          - Email alerts on new responses
+          - Automated reminders for incomplete surveys
+          - In-app notification feed
 
 ---
 
-Would you like a **UI wireframe** or **ERD (Entity Relationship Diagram)** for the database structure? 🚀
+## Phase 3: Scaling & AI Enhancements (Months 7–12)
+
+[TODO]    CONVERSATIONAL AI SURVEYS
+          - Chatbot-style question flow
+          - Smart follow-up questions based on previous answers
+          - Integrate Claude API or OpenAI
+
+[TODO]    AI SURVEY AUTO-GENERATION
+          - Generate full surveys from a topic/industry prompt
+          - Smart question and choice suggestions
+          - Integrate Claude API
+
+[TODO]    MULTI-LANGUAGE SUPPORT
+          - AI-powered translation of survey content
+          - Auto-detect participant language
+          - RTL layout support
+
+[TODO]    ROLE MANAGEMENT & PERMISSIONS
+          - Roles: Admin, Editor, Viewer
+          - Per-survey access control
+          - Audit logs
+
+[TODO]    MOBILE APP (iOS & Android)
+          - Push notifications for new responses
+          - Offline survey collection with sync
+
+[TODO]    PERFORMANCE & SCALABILITY
+          - Redis caching for high-traffic surveys
+          - Database query optimization
+          - Load balancing setup
+
+---
+
+## Tech Stack (Actual)
+
+Frontend:   Next.js 15, React 19, Tailwind CSS
+Backend:    Django 5.1, Django REST Framework, SimpleJWT
+Database:   PostgreSQL
+AI:         Claude API (planned), OpenAI GPT (planned), VADER sentiment
+Hosting:    TBD (AWS EC2/S3 or similar)
+
+---
+
+## Phase 1 Completion Status (as of 2026-03-16)
+
+[DONE]    Auth Page — login + signup, JWT stored in localStorage, redirects to dashboard
+[DONE]    Dashboard Page — lists user surveys with stats, delete, and quick links
+[DONE]    Survey Creation Page — question builder (text/MCQ/rating/yes-no), reorder, choices, publish
+[DONE]    Survey Distribution Page — shareable link, embed code, QR code, social share
+[DONE]    Survey Response Page — participant form at /survey-response/[id], progress bar, submit
+[DONE]    Survey Report Page — response count, CSS bar charts per question, CSV export
+[DONE]    User Management Page — profile edit (name/email), change password tabs
+[DONE]    Admin Panel — platform stats, survey moderation (activate/deactivate), user table
+
+## Backend additions made during Phase 1 build
+[DONE]    PATCH /api/auth/user/ — update profile
+[DONE]    POST /api/auth/change-password/ — change password
+[DONE]    GET /api/admin/stats/ — admin-only platform overview
+[DONE]    QuestionSerializer — now supports nested choice creation on POST/PUT
+[DONE]    api.js — rewritten to use native fetch (no axios dependency)
