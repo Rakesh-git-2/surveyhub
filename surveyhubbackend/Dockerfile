@@ -1,18 +1,31 @@
-FROM python:3.9-slim
+ARG PYTHON_VERSION=3.9-slim
 
-WORKDIR /app
+FROM python:${PYTHON_VERSION}
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev gcc \
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install psycopg2 dependencies.
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN mkdir -p /code
 
-COPY . .
+WORKDIR /code
 
+COPY requirements.txt /tmp/requirements.txt
+RUN set -ex && \
+    pip install --upgrade pip && \
+    pip install -r /tmp/requirements.txt && \
+    rm -rf /root/.cache/
+COPY . /code
+
+# Dummy key for collectstatic only — real key injected via fly secrets at runtime
+ENV SECRET_KEY "django-insecure-build-placeholder-not-used-at-runtime"
 RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-CMD ["python", "-m", "gunicorn", "surveyhubbackend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+CMD ["gunicorn","--bind",":8000","--workers","2","surveyhubbackend.wsgi"]
