@@ -9,12 +9,15 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'is_active', 'is_staff')
 
 class ChoiceSerializer(serializers.ModelSerializer):
+    choice_text = serializers.CharField(max_length=200)
+
     class Meta:
         model = Choice
         fields = ('id', 'choice_text', 'order')
         read_only_fields = ('id',)
 
 class QuestionSerializer(serializers.ModelSerializer):
+    question_text = serializers.CharField(max_length=500)
     choices = ChoiceSerializer(many=True, required=False)
 
     class Meta:
@@ -57,6 +60,9 @@ class SurveySerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'created_at', 'updated_at', 'creator')
 
 class SurveyCreateSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(max_length=200)
+    description = serializers.CharField(max_length=2000, allow_blank=True, required=False, default='')
+
     class Meta:
         model = Survey
         fields = ('id', 'title', 'description', 'is_active', 'allow_anonymous')

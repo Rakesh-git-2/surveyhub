@@ -1,9 +1,15 @@
+import ipaddress
+from urllib.parse import urlparse
+
 from rest_framework import generics, permissions, status
-from rest_framework.decorators import api_view, permission_classes as drf_permission_classes
+from rest_framework.decorators import api_view, permission_classes as drf_permission_classes, throttle_classes as drf_throttle_classes
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q, Count
 from django.utils import timezone
 from datetime import timedelta
@@ -12,6 +18,43 @@ from .serializers import (
     SurveySerializer, SurveyCreateSerializer,
     QuestionSerializer, ResponseSerializer, UserSerializer,
 )
+
+
+class LoginRateThrottle(AnonRateThrottle):
+    rate = '10/minute'
+    scope = 'login'
+
+
+class RegisterRateThrottle(AnonRateThrottle):
+    rate = '5/minute'
+    scope = 'register'
+
+
+_BLOCKED_HOSTNAMES = frozenset({
+    'localhost', '127.0.0.1', '0.0.0.0', '::1',
+    'metadata.google.internal', '169.254.169.254',
+})
+
+
+def _is_safe_webhook_url(url: str) -> bool:
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return False
+    if parsed.scheme not in ('http', 'https'):
+        return False
+    hostname = parsed.hostname or ''
+    if not hostname:
+        return False
+    if hostname.lower() in _BLOCKED_HOSTNAMES:
+        return False
+    try:
+        addr = ipaddress.ip_address(hostname)
+        if addr.is_private or addr.is_loopback or addr.is_link_local or addr.is_reserved:
+            return False
+    except ValueError:
+        pass  # hostname — DNS resolution not checked (acceptable for MVP)
+    return True
 
 
 class IsOwner(permissions.BasePermission):
@@ -97,6 +140,7 @@ class ResponseListView(generics.ListAPIView):
 
 @api_view(['POST'])
 @drf_permission_classes([permissions.AllowAny])
+@drf_throttle_classes([RegisterRateThrottle])
 def register(request):
     username = request.data.get('username')
     email = request.data.get('email')
@@ -110,6 +154,11 @@ def register(request):
     if User.objects.filter(email=email).exists():
         return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
+    try:
+        validate_password(password)
+    except DjangoValidationError as e:
+        return Response({'error': list(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
+
     user = User.objects.create_user(username=username, email=email, password=password)
     refresh = RefreshToken.for_user(user)
     return Response({
@@ -121,6 +170,7 @@ def register(request):
 
 @api_view(['POST'])
 @drf_permission_classes([permissions.AllowAny])
+@drf_throttle_classes([LoginRateThrottle])
 def login(request):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -184,6 +234,10 @@ def change_password(request):
         return Response({'error': 'Both old and new passwords required'}, status=status.HTTP_400_BAD_REQUEST)
     if not request.user.check_password(old_password):
         return Response({'error': 'Current password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        validate_password(new_password, user=request.user)
+    except DjangoValidationError as e:
+        return Response({'error': list(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
     request.user.set_password(new_password)
     request.user.save()
     return Response({'message': 'Password changed successfully'})
@@ -594,6 +648,8 @@ def webhook_list_create(request):
         url = request.data.get('url', '').strip()
         if not url:
             return Response({'error': 'url is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not _is_safe_webhook_url(url):
+            return Response({'error': 'Invalid or disallowed URL'}, status=status.HTTP_400_BAD_REQUEST)
         survey_id = request.data.get('survey_id') or None
         survey = None
         if survey_id:
@@ -630,7 +686,10 @@ def webhook_detail(request, pk):
     if 'is_active' in request.data:
         hook.is_active = bool(request.data['is_active'])
     if 'url' in request.data:
-        hook.url = request.data['url'].strip()
+        new_url = request.data['url'].strip()
+        if not _is_safe_webhook_url(new_url):
+            return Response({'error': 'Invalid or disallowed URL'}, status=status.HTTP_400_BAD_REQUEST)
+        hook.url = new_url
     if 'secret' in request.data:
         hook.secret = request.data['secret']
     hook.save()
