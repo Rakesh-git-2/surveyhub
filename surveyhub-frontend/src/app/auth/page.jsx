@@ -83,7 +83,7 @@ export default function AuthPage() {
       {/* Left panel — decorative */}
       <div style={{
         flex: '0 0 45%', background: 'var(--grad-hero)',
-        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        flexDirection: 'column', justifyContent: 'center',
         padding: '3rem', position: 'relative', overflow: 'hidden',
       }} className="hidden md:flex">
         {/* glow */}
