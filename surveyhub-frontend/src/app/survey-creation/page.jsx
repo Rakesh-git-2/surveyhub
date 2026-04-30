@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../context/authContext';
 import { apiRequest } from '../../api/api';
@@ -26,7 +26,7 @@ function apiQuestionToLocal(q, order) {
   };
 }
 
-export default function SurveyCreationPage() {
+function SurveyCreationPage() {
   const { state } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -321,5 +321,13 @@ export default function SurveyCreationPage() {
         </form>
       </div>
     </main>
+  );
+}
+
+export default function SurveyCreationPageWrapper() {
+  return (
+    <Suspense>
+      <SurveyCreationPage />
+    </Suspense>
   );
 }
